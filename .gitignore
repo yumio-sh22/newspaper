@@ -1,0 +1,32 @@
+@"
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+.env.local
+
+# Node.js
+node_modules/
+dist/
+*.local
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+"@ | Out-File -FilePath ".gitignore" -Encoding UTF8
