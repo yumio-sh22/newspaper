@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional, Type, TypeVar
-from ..models import User, Article, Category
+from .models import User, Article, Category
 
 ModelType = TypeVar("ModelType")
 

@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import auth, articles
+from .database import Base, engine
 
-# ❌ НЕ ИМПОРТИРУЕМ и НЕ ВЫЗЫВАЕМ create_all!
-# Таблицы уже созданы через Docker init-скрипты
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Newspaper API")
 

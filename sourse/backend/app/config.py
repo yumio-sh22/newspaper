@@ -3,10 +3,10 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Только ASCII символы!
-    DB_HOST: str = "localhost"
+    DB_HOST: str = "127.0.0.1"
     DB_PORT: int = 5432
     DB_USER: str = "newspaper_user"
-    DB_PASSWORD: str = "test123"
+    DB_PASSWORD: str = "simple123"
     DB_NAME: str = "newspaper_db"
     JWT_SECRET: str = "supersecretjwtkey32charslong"
     ALGORITHM: str = "HS256"

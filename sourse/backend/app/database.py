@@ -1,10 +1,16 @@
+import os
+os.environ["PGAPPNAME"] = "newspaper"
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from .config import settings
 
-# 🔥 Жестко прописанные параметры (только ASCII!)
-DATABASE_URL = "postgresql://newspaper_user:simple123@127.0.0.1:5432/newspaper_db"
+engine = create_engine(
+    f"postgresql+psycopg2://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}",
+    connect_args={"options": "-c client_encoding=UTF8"},
+    echo=False,
+)
 
-engine = create_engine(DATABASE_URL, echo=True)  # echo=True для отладки
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -14,4 +20,3 @@ def get_db():
         yield db
     finally:
         db.close()
-        
