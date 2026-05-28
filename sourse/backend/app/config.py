@@ -3,7 +3,7 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # Только ASCII символы!
-    DB_HOST: str = "127.0.0.1"
+    DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "newspaper_user"
     DB_PASSWORD: str = "simple123"
