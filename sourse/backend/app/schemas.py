@@ -19,6 +19,7 @@ class ArticleCreate(BaseModel):
 class ArticleOut(BaseModel):
     id: int; title: str; slug: str; content: str; status: str
     author_id: int; published_at: Optional[datetime]
+    created_at: datetime
     class Config: from_attributes = True
 
 class Token(BaseModel):

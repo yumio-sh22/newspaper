@@ -1,220 +1,112 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../../api/axios';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Register() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    full_name: ''
+    full_name: '',
+    role: 'reader'
   });
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const { register, loading } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
+    
     try {
-      const response = await api.post('/auth/register', {
-        email: formData.email,
-        password: formData.password,
-        full_name: formData.full_name,
-        role: 'reader'
-      });
-
-      console.log('Регистрация успешна:', response.data);
-      
-      // Автоматический вход после регистрации
-      const loginResponse = await api.post('/auth/login', null, {
-        params: {
-          email: formData.email,
-          password: formData.password
-        }
-      });
-
-      localStorage.setItem('token', loginResponse.data.access_token);
-      localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
-      
-      // Перенаправление на главную
-      navigate('/');
-    } catch (err) {
-      console.error('Ошибка регистрации:', err);
-      if (err.response?.status === 400) {
-        setError('Этот email уже зарегистрирован');
+      const success = await register(formData);
+      if (success) {
+        setSuccess(true);
+        setTimeout(() => navigate('/login'), 2000);
       } else {
-        setError('Ошибка при регистрации. Проверьте данные и попробуйте снова.');
+        setError('Ошибка регистрации. Email уже занят или неверные данные.');
       }
-    } finally {
-      setLoading(false);
+    } catch {
+      setError('Ошибка подключения к серверу');
     }
   };
 
-  return (
-    <div style={{ 
-      minHeight: 'calc(100vh - 70px)', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      backgroundColor: '#f5f5f5',
-      padding: '20px'
-    }}>
-      <div style={{ 
-        backgroundColor: 'white',
-        padding: '40px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        width: '100%',
-        maxWidth: '400px'
-      }}>
-        <h2 style={{ 
-          margin: '0 0 30px 0', 
-          textAlign: 'center',
-          color: '#333'
-        }}>
-          Регистрация
-        </h2>
-
-        {error && (
-          <div style={{
-            marginBottom: '20px',
-            padding: '12px',
-            backgroundColor: '#ffe6e6',
-            color: '#d32f2f',
-            borderRadius: '4px',
-            textAlign: 'center'
-          }}>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              color: '#555'
-            }}>
-              ФИО:
-            </label>
-            <input
-              type="text"
-              name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
-              required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
-              placeholder="Иванов Иван Иванович"
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              color: '#555'
-            }}>
-              Email:
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
-              placeholder="example@mail.ru"
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px',
-              fontWeight: 'bold',
-              color: '#555'
-            }}>
-              Пароль:
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="6"
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px',
-                boxSizing: 'border-box'
-              }}
-              placeholder="Минимум 6 символов"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '14px',
-              backgroundColor: loading ? '#999' : '#0056b3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              marginTop: '10px'
-            }}
-          >
-            {loading ? 'Регистрация...' : 'Зарегистрироваться'}
-          </button>
-        </form>
-
-        <p style={{ 
-          textAlign: 'center', 
-          marginTop: '20px',
-          color: '#666'
-        }}>
-          Уже есть аккаунт?{' '}
-          <Link to="/login" style={{ 
-            color: '#0056b3', 
-            fontWeight: 'bold',
-            textDecoration: 'none'
-          }}>
-            Войти
-          </Link>
-        </p>
+  if (success) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.successIcon}>✅</div>
+        <h2 style={styles.title}>Регистрация успешна!</h2>
+        <p style={styles.text}>Перенаправляем на страницу входа...</p>
       </div>
+    );
+  }
+
+  return (
+    <div style={styles.container}>
+      <h2 style={styles.title}>📝 Регистрация</h2>
+      
+      {error && <div style={styles.error}>⚠️ {error}</div>}
+      
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Email:</label>
+          <input name="email" type="email" value={formData.email} onChange={handleChange} required style={styles.input} />
+        </div>
+        
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Пароль (мин. 6 символов):</label>
+          <input name="password" type="password" value={formData.password} onChange={handleChange} required minLength={6} style={styles.input} />
+        </div>
+        
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Полное имя:</label>
+          <input name="full_name" type="text" value={formData.full_name} onChange={handleChange} required style={styles.input} placeholder="Иван Иванов" />
+        </div>
+        
+        <div style={styles.inputGroup}>
+          <label style={styles.label}>Роль:</label>
+          <select name="role" value={formData.role} onChange={handleChange} style={styles.input}>
+            <option value="reader">👁 Читатель</option>
+            <option value="author">✍️ Автор</option>
+            <option value="admin">⚙️ Администратор</option>
+          </select>
+        </div>
+        
+        <button type="submit" disabled={loading} style={{...styles.button, opacity: loading ? 0.7 : 1}}>
+          {loading ? '⏳ Регистрируем...' : '🚀 Зарегистрироваться'}
+        </button>
+      </form>
+      
+      <p style={styles.footer}>
+        Уже есть аккаунт? <Link to="/login" style={styles.link}>Войти</Link>
+      </p>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    maxWidth: '450px',
+    margin: '2rem auto',
+    padding: '2rem',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+    textAlign: 'center'
+  },
+  title: { marginBottom: '1.5rem', color: '#2c3e50', fontSize: '1.8rem' },
+  successIcon: { fontSize: '3rem', marginBottom: '1rem' },
+  text: { color: '#555', fontSize: '1.1rem' },
+  form: { display: 'flex', flexDirection: 'column', gap: '1rem', textAlign: 'left' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+  label: { fontWeight: '500', color: '#555', fontSize: '0.9rem' },
+  input: { padding: '0.8rem', border: '1px solid #ddd', borderRadius: '8px', fontSize: '1rem' },
+  button: { marginTop: '0.5rem', padding: '0.9rem', backgroundColor: '#27ae60', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer', transition: 'background 0.2s' },
+  error: { backgroundColor: '#fee2e2', color: '#dc2626', padding: '0.8rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.9rem' },
+  footer: { marginTop: '1.5rem', color: '#666', fontSize: '0.95rem' },
+  link: { color: '#3498db', textDecoration: 'none', fontWeight: '500' }
+};
