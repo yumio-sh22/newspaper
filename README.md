@@ -117,7 +117,6 @@ Newspaper/
 │       ├── procedures.sql
 │       ├── triggers.sql
 │       └── views.sql
-├── Documents/                   # Пояснительная записка (отчет)
 ── Source/                      # Исходный код
 │   ├── backend/                 # Серверная часть (FastAPI)
 │   ── frontend/                # Клиентская часть (React)
